@@ -22,115 +22,93 @@
 " See also the most current upstream source of the same:
 "   https://github.com/marshallward/vim-restructuredtext
 
-" +======================================================================+
-" +======================================================================+
+" +----------------------------------------------------------------------+
 
-" *** DEV. UTIL. FCN.: Log message to file (b/c `echom` doesn't work from syntax).
+" SAVVY/2022-09-24: Note that Vim *normally* adds new `syn match` rules
+" to the end of the syntax rules list (what you see when you run either
+" `:syn`, or `:TabMessage syn`), but not always!
+"
+" - When determining highlighting, per `:help syn`, Vim uses the last-
+"   matching syntax rule to decide how to highlight a given match.
+"
+"   - Or it uses the item that starts in an earlier position! (See below)
+"
+" - Normally, your script load order (see `:scriptnames`) determines
+"   the order you see syntax rules listed (what `:syn` shows).
+"
+"   - But not always!
+"
+" - I didn't find this documented, but I found that, in practice,
+"   if you clear an existing syntax rule (`:syn clear X`) and then
+"   redefine it (`:syn match X ...`):
+"
+"   - The newly *redefined* rule keeps the same order as the previous rule!
+"
+" - My concern (and why I learned this unwritten rule) was that, after
+"   splitting this plugin from vim-reSTfold#🙏, I thought there might
+"   be a load-order race condition issue between the two plugins.
+"
+"   - Specifically, I was concerned that the syntax matches herein would
+"     override the other plugin's `syn match rstSections` rule (which
+"     highlights true reST section headers) if this plugin loaded *after*
+"     the other plugin (in which case, this plugin's `syn match` rules
+"     would win because they would come after the `rstSections` rule).
+"
+"     - Well, unless the other rule matches at an earlier position. (See below)
+"
+"   - I'm not referring to rstFakeHRAll (defined below), which requires a
+"     blank line above and below the FakeHR to be highlighted (which would
+"     not be a true reST section header, so it wouldn't match rstSections).
+"
+"     - But I am talking about the other matches, e.g., rstFakeHRStars only
+"       checks that the line below is blank.
+"
+"     - Indeed, if you `syn clear rstSections`, you'll see that some of the
+"       rules below will highlight what was matched by rstSections. E.g.,
+"       a word line followed by a line of asterisks is normally matched
+"       by rstSections, but if you `:syn clear rstSections`, then
+"       rstFakeHRStars steps in to highlight it.
+"
+" - Nonetheless, load order does not matter for the two plugins in question.
+"
+"   - To test, I renamed rstSections in the other plugin to rstSectionsTWO
+"     (so that it wouldn't just re-assume the same load order as the
+"     built-in rstSections rule, as I explained above). And then I tested
+"     loading rstFakeHRStars before and after rstSectionsTWO (and I also
+"     confirmed via `:syn` that the load order changed between tests).
+"     But it made no difference!
+"
+"   - What I think is happening is that rstSections (or rstSectionsTWO,
+"     from my test) always matches from an earlier position than the
+"     rules below, so rstSections always wins, regardless of its order
+"     in the syntax list.
+"
+"   - Per `:help syn`:
+"
+"       PRIORITY						*:syn-priority*
+"
+"       When several syntax items may match, these rules are used:
+"
+"       1. When multiple Match or Region items start in the same position, the item
+"          defined last has priority.
+"       2. A Keyword has priority over Match and Region items.
+"       3. An item that starts in an earlier position has priority over items that
+"          start in later positions.
+"
+"     So my guess is that Priority rule #3 applies.
+"
+"     Which means, 73 lines of comment later, we don't have to worry about
+"     load order between this plugin's syntax rules (vim-reST-highline) and
+"     the other plugin's syntax rules (vim-reSTfold), regardless of their
+"     overlapping patterns, because vim-reSTfold will always win, due to
+"     matching from an earlier position in the text. Which is what we want,
+"     for the rules in this plugin to be subordinate to vim-reSTfold.
 
-" 2018-12-07: Log to file, inspired by lervag@github: b/c cannot echom from syntax file?
-"   https://github.com/lervag/dotvim/blob/master/personal/plugin/log-autocmds.vim
-function! s:log(message)
-  silent execute '!echo "'
-    \ . strftime('%T', localtime()) . ' - ' . a:message . '"'
-    \ '>> /tmp/vim_log_dubs_after_syntax_rst'
-endfunction
+" +----------------------------------------------------------------------+
 
-" NOTE: [lb]: I can `call s:log('...')` and `tail -F /tmp/vim_log_dubs_after_syntax_rst`
-"       successfully. But I cannot `echom '...'` anything. Not sure why.
+" *** Custom reST rules/reST extension: Pseudo-Horizontal Rule Highlights
 
-" +======================================================================+
-" +======================================================================+
-
-" *** SYNTAX GROUP: reST section highlighting.
-
-function! s:reSTfold_Clear_Highlights()
-  " reST header syntax can use any of the 32 punctation keys found on a US keyboard:
-  "
-  "   ! " # $ % & ' ( ) * + , - . / : ; < = > ? @ [ \ ] ^ _ ` { | } ~
-  "
-  " The documentation recommends using a subset of those, because "some characters
-  " are more suitable than others":
-  "
-  "   = - ` : . ' " ~ ^ _ * + #
-  "
-  " Omitted from included rst syntax runtime:
-  "
-  "   ! $ % & ( ) , / ; < > ? @ [ \ ] { | }
-  "
-  " Although I'd respond that that's really user preference, and that the syntax
-  " plugin should honor what reST itself honors. (I'd concede this might not be
-  " the case if certain punctuation is used in a way that's not for headerizing,
-  " but that might be interpreted as such, e.g., a merge conflict uses angle
-  " brackets in such a way:
-  "
-  "   <<<<<<<<<<<<<<
-  "   some code
-  "   ==============
-  "   other code
-  "   >>>>>>>>>>>>>>
-  "
-  " and we wouldn't want any of this to be interpreted as headerization.
-  " (But such code would most likely be in a block quote, anyway.)
-  "
-  " I'm adding in the missing punctuation and we'll see how it goes.
-  "
-  " (What I really want is a few more 'Big' symbols that'll look good
-  " as the main, top-level section. I currently use '#', which is the
-  " character that uses the most ink of all available characters. But
-  " I think '$', '@', and '&' could also work to convey main-sectionness.)
-  syn clear rstSections
-endfunction
-
-function! s:reSTfold_Apply_Highlights_Missing_Punctuation()
-  " Add the missing punctuation characters to reST header syntax matching:
-  "
-  "   !@$%&()[]{}<>/\|,;?
-  "
-  " [lb]: We use "very magic" regex to make non-counting groups.
-  "
-  "       See:
-  "
-  "         :h pattern-overview
-  "
-  "       Enable very magic regex:
-  "
-  "         /\v  \v  \v   the following chars in the pattern are "very magic"
-  "
-  "       Use a non-counting match group, %(...):
-  "
-  "         \%(\)         A pattern enclosed by escaped parentheses.
-  "         Just like \(\), but without counting it as a sub-expression.
-  "         This allows using more groups and it's a little bit faster.
-  "
-  "       See also:
-  "
-  "         :h literal-string
-  "
-  "       which explains why we use double quotes and not single quotes,
-  "       because we want to use the escaped character, "\v", and
-  "       not the two characters, slash and v, '\v' (or "\\v").
-  "
-  " NOTE: `-` must come last so it is not interpreted as range.
-  "
-  " NOTE: `+` does not highlight when used both below and above,
-  "             because it's interpreted as rstTableLines.
-  "
-  " 2021-10-14: On second thought, disable spell checking.
-  " - For one, some rules will be superceded:
-  "   - AcronymNoSpell, e.g., 'ABCs' is under-squiggled as misspelled.
-  "   - Code blocks, e.g., ``fooBar``.
-  " - The under-squiggle makes the title more difficult to read.
-  " - So don't use @Spell, e.g., not: syn match rstSections ... contains=@Spell
-  "
-  syn match rstSections "\v^%(([=`:.'"~^_*+#!@$%&()[\]{}<>/\\|,;?-])\1{2,}\n)?.{3,}\n([=`:.'"~^_*+#!@$%&()[\]{}<>/\\|,;?-])\2{2,}$" contains=@NoSpell
-endfunction
-
-" +======================================================================+
-" +======================================================================+
-
-" *** (p)reST(o) reST extension: reSTrule: Pseudo-Horizontal Rule Highlights
-
-function! s:reSTfold_Apply_Highlights_Repeated_Chars()
+function! s:reST_highline_Apply_Highlights()
   " 2018-01-30: SO 🆒!
   "
   "   This is pretty cool. And it only serves one purpose:
@@ -140,12 +118,16 @@ function! s:reSTfold_Apply_Highlights_Repeated_Chars()
   "   You can fiddle with the highlights for specific characters
   "     below.
   "   In this way, you can create more visually appealing reST
-  "     documents, and you can more easily highlight section
-  "     headers, as well as section delimiters!
+  "     documents (albeit only when shown in Vim; they'll otherwise
+  "     render to HTML without this special highlighting), and you
+  "     can more easily highlight document delimiters, such as a
+  "     using a row of dashes (but ensuring the preceding line is
+  "     blank, otherwise the preceding line and the dashes would be
+  "     interpreted as a normal reST section header).
 
-  " - The HR match interferes with rstSections, whether it's defined before or
-  "   after, and I'm not sure what's up, so only highlight when HR is followed
-  "   by newlines, to avoid conflict.
+  " - The HR match interferes with rstSections (see vim-reSTfold#🙏),
+  "   whether it's defined before or after, and I'm not sure what's up,
+  "   so only highlight when HR is followed by newlines, to avoid conflict.
   "   - (And note that `\n\n` sorta works, but the highlight only works if
   "      there are two trailing blank lines; whereas using just `\n` works,
   "      but then the top line of a real section header gets hijack-highlighted
@@ -169,6 +151,12 @@ function! s:reSTfold_Apply_Highlights_Repeated_Chars()
   "   rstFakeHRStars rule, but typing 9 or more repeating asterisk
   "   would match rstFakeHRAll instead. Not sure why. To avoid this,
   "   exclude the special characters from the 'all' match.
+
+  " CXREF: See also the builtin runtime/syntax/rst.vim rstTransition rule:
+  "   syn match   rstTransition  /^[=`:.'"~^_*+#-]\{4,}\s*$/
+  " which would match some of these same style of HRs if we were not to
+  " define these rules.
+
   syn match rstFakeHRAll   '^\n\s*\([^|*$()%]\)\1\{8,}\s*\n$'
   " Match lines of repeating `|`s.
   syn match rstFakeHRPipes '^\s*|\{8,}\s*\n$'
@@ -196,19 +184,13 @@ function! s:reSTfold_Apply_Highlights_Repeated_Chars()
   hi! def link rstFakeHRBills rstHorizRuleUser01
 endfunction
 
-" +======================================================================+
-" +======================================================================+
+" +----------------------------------------------------------------------+
 
-function! s:reSTfold_Wire_Highlights()
-  call s:reSTfold_Clear_Highlights()
-
-  call s:reSTfold_Apply_Highlights_Repeated_Chars()
-
-  " Do real reST Section highlighting so it overrides, e.g., rstFakeHRAll.
-  call s:reSTfold_Apply_Highlights_Missing_Punctuation()
+function! s:reST_highline_Wire_Highlights()
+  call s:reST_highline_Apply_Highlights()
 endfunction
 
 " +----------------------------------------------------------------------+
 
-call s:reSTfold_Wire_Highlights()
+call s:reST_highline_Wire_Highlights()
 
