@@ -1,6 +1,6 @@
 " Powerful (Cleverful!) reST section folder
 " Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
-" Project: https://github.com/landonb/vim-reSTfold#🙏
+" Project: https://github.com/landonb/vim-reST-highline#➖
 " License: GPLv3
 "  vim:tw=0:ts=2:sw=2:et:norl:
 
