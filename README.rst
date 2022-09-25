@@ -1,317 +1,106 @@
-###############################################
-``vim-reSTfold`` |em_dash| reST Document Folder
-###############################################
+################################################################
+``vim-reST-highline`` |em_dash| reST horizontal rule highlighter
+################################################################
 
 .. |em_dash| unicode:: 0x2014 .. em dash
 
 About This Plugin
 =================
 
-This plugin adds advanced reST document section folding.
+This plugin highlights lines of repeated characters
+(that aren't otherwise a reST section header), so
+that you can add colorful delimiters to your reST
+documents.
 
-Supercharge your notetaking and recordkeeping!
+*Supercharge your notetaking and recordkeeping!*
 
-Install this plugin to make it easier to manage
-notes in Vim using reStructuredText markup.
+Install this plugin and make your reStructuredText markup more lively.
 
 Why You Might Want to Use This Plugin
 =====================================
 
-If you like to use Vim to organize your life (I do!),
-see how this plugin makes it easier to manage your notes.
+(Of all the author's reStructuredText plugins, this is the last
+one you might want. Not to undersell it, but first check out
+`Tips: Related supercharged reST plugins`_, below, if you have
+not already demoed or installed my other reST plugins.)
 
-Consider the following document::
+This plugin works quite simply: if you repeat the same character
+eight or more times on a line, and there are no other characters
+besides whitespace, that line is specially highlighted.
 
-  @@@@@@@@@@@@@@
-  reSTfold Notes
-  @@@@@@@@@@@@@@
+The author used to use this feature, e.g., to draw a line of
+pipes, and they'd be highlighted in green::
 
-  ####################################
-  FIXME: Update reSTfold plugin README
-  ####################################
+  Blah blah blah some text.
 
-  2021-07-12 21:39: Update reSTfold README with latest enhancements.
+  |||||||||||||||||
 
-  #######################################################
-  MAYBE: Publish Medium article to promote reSTfold usage
-  #######################################################
+  Blah blah blah some more text.
 
-  2021-07-13 12:04: Get some claps.
-  - Research what makes a good tech article.
-  - Devise a better example than this readme.
-  - Find a copy editor to review your work.
+Or to draw a line of dollar signs, and they'd be highlighted
+with a cyan background, e.g.,::
 
-  ######################
-  NOTES: Some more notes
-  ######################
+  Blah blah blah some text.
 
-  Foo bar baz bat.
+  $$$$$$$$$$$$$$$$$
 
-This plugin lets you fold the reST headers, collapsing everything into
-essentially a high-level Table of Contents. You can then open individual
-sections to read or work on their contents.
+  Blah blah blah some more text.
 
-E.g., press ``<F5>`` to collapse all folds, and Vim will show::
+But recently, the author has just been using a row of seven dashes
+as a delimiter, which the built-in ``runtime/syntax/rst.vim`` rules
+highlight in purple.
 
-   1 @@@@@@@@@@@@@@
-   2 reSTfold Notes
-   3 @@@@@@@@@@@@@@
-   4
-   5  ┌─ FIXME: Update reSTfold plugin README                     ──┤  6 ll. ├─
-  11  ├─ MAYBE: Publish Medium article to promote reSTfold usage  ──┤  8 ll. ├─
-  19  └─ NOTES: Some more notes                                   ──┤  6 ll. ├─
+- You can easily insert such a line of dashes using the ``<Ctrl-->``
+  (Ctrl-minus) shortcut, if you install `vim-ovm-seven-of-spines
+  <https://github.com/landonb/vim-ovm-seven-of-spines>`__.
 
-You can then use the normal Vim fold commands to open and close folds.
+Nonetheless, this plugin still exists, because it's how I used to
+roll, until I realized that a short horizontal rule of seven dashes
+was enough to delineate one sub-section of my notes from another,
+without creating a new section header.
 
-For example, position the cursor over a fold title and type ``za`` to open it.
+E.g., I might have a section for some bug that I want to fix, and
+then I'll use the seven-dash approach to separate my different
+thoughts on the subject, such as::
 
-Usage: Signify Fold Levels using Specific Punctuation
-=====================================================
+  #########################################################
+  FIXME/2022-09-24: Move reST HR highlights to a new plugin
+  #########################################################
 
-Generally, reST lets you choose any delimiters (ASCII punctuation)
-to use for the different heading levels, and the reST parser will
-infer the levels from their usage order within the document.
+  FIXME/2022-09-24 22:11: Split the vim-reSTfold plugin to
+  spin-off the HR highlights.
 
-You indicate a heading by underlining with the same punctuation
-character. The reST specification also lets you add an overline.
+  -------
 
-For instance, both of these documents render the same:
+  SPIKE/2022-09-24 22:12: Verify that syntax load order does
+  not interfere with the `rstSections` rule from vim-reSTfold.
 
-Document 1::
+  -------
 
-  Level 1 Heading
-  ###############
+  ################################################
+  FIXME/2022-09-24: Some other issue I want to fix
+  ################################################
 
-  ===============
-  Level 2 Heading
-  ===============
+  Blah blah blah.
 
-and Document 2::
-
-  ===============
-  Level 1 Heading
-  ===============
-
-  Level 2 Heading
-  ---------------
-
-But this plugin is not as flexible.
-
-To use ``vim-reSTfold``, you'll need to follow a few guidelines.
-
-(These rules make the plugin less complex, and probably faster.)
-
-Rule #1: Only double-bordered headers will be folded
-----------------------------------------------------
-
-- Use a double-bordered reST heading for sections you want folded.
-
-- E.g., this header with both an overscore and an underscore will be folded::
-
-    ###########################
-    This Section Will Be Folded
-    ###########################
-
-  but this header, with only an underscore, will not be folded::
-
-    This Section Will Not Be Folded
-    ###############################
-
-**Use an underline and overline around the heading for each section you want folded.**
-
-Rule #2: Use these 4 characters for your headings
--------------------------------------------------
-
-- Use the following characters for the heading levels indicated:
-
-  - Level 1: ``@``
-
-  - Level 2: ``#``
-
-  - Level 3: ``=``
-
-  - Level 4: ``-``
-
-(Note that characters used for the higher levels use more pixels per
-character than those in lower levels. So, visually, higher level
-headings appear darker.)
-
-- Note that each document must only have one Level 1 heading, at the top.
-
-  This section is never folded.
-
-- Use the normal Vim fold commands to open and close folds.
-
-  E.g., type ``zr`` (in Normal mode) to collapse one level of folds.
-
-  Or type ``zm`` to open one level of folds, or ``za`` to toggle the
-  current fold open and closed.
-
-- As an example, this document has two Level 2 sections::
-
-    @@@@@@@@@@@@@@
-    Document Title
-    @@@@@@@@@@@@@@
-
-    ###############
-    Level 2 Section
-    ###############
-
-    ===============
-    Level 3 Section
-    ===============
-
-    #######################
-    Another Level 2 Section
-    #######################
-
-    =======================
-    Another Level 3 Section
-    =======================
-
-    Another Level 3 section, but ignored by folder
-    ==============================================
-
-    --------------------------
-    A Foldable Level 4 Section
-    --------------------------
-
-**Use the 4 characters (@, #, =, and -) to signify the different heading levels.**
-
-Usage: Press ``<F5>`` to Manually Recalculate Folds
-===================================================
-
-By default, Vim enables reST folding.
-
-But this can cause performance issues, e.g., every time you insert or
-remove a character from a buffer, Vim has to recalculate folds.
-
-To prevent performance issues, the user must explicitly generate folds.
-
-**Press <F5> to generate (and collapse all) folds.**
-
-Usage: Use ``<C-Up>`` and ``<C-Down>`` to Transpose Folds
-=========================================================
-
-In normal mode, with the cursor over a folded reST section,
-press ``<Ctrl-Up>`` to swap the fold under the cursor with the
-fold under the line above the cursor; press ``<Ctrl-Down>`` to
-swap with the fold on the line following the current fold.
-
-**Swap reST Sections (Transpose Folds) using ``<C-Up>`` and ``<C-Down>``.**
-
-Tip: You Can Beautify Titles When Collapsed
-===========================================
-
-The reST section title that's sandwiched between the section delimiter
-lines is used for the folded view title.
-
-Because of this, you can design section titles that look good folded, too.
-
-For instance, consider the following, unfolded document::
-
-  @@@@@
-  NOTES
-  @@@@@
-
-  ###########################################################
-  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-  ###########################################################
-
-  ###########################################################
-  ┣━━ // * TABLE_OF_CONTENTS * // ━━━━━━━━━━━━━━━━━━━━━━━━━━┨
-  ###########################################################
-
-  ###########################################################
-  ┃   ┏━━━━━━━━━━━━━┓                                       ┃
-  ###########################################################
-
-  ###########################################################
-  ┃   ┃ ☼ FOO BAR ☼ ┃                                       ┃
-  ###########################################################
-
-  ###########################################################
-  ┃ ┏━┻━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┃
-  ###########################################################
-
-  ###########################################################
-  ┃ ┃ SECTION X: Blah blah blah                           ┃ ┃
-  ###########################################################
-
-  Blah blah blah
-
-  ###########################################################
-  ┃ ┃ SECTION Y: Blasé blasé blasé                        ┃ ┃
-  ###########################################################
-
-  Blasé blasé blasé
-
-  ###########################################################
-  ┃ ┃ SECTION Z: Patati Patata                            ┃ ┃
-  ###########################################################
-
-  Patati Patata
-
-  ###########################################################
-  ┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃
-  ###########################################################
-
-  ###########################################################
-  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
-  ###########################################################
-
-Once folded (e.g., press ``<F5>``), it'll look like this::
-
-   1 @@@@@
-   2 NOTES
-   3 @@@@@
-   4
-   5 │  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓      │  4 ll. │
-   9 │  ┣━━ // * TABLE_OF_CONTENTS * // ━━━━━━━━━━━━━━━━━━━━━━━━━━┨      │  4 ll. │
-  13 │  ┃   ┏━━━━━━━━━━━━━┓                                       ┃      │  4 ll. │
-  17 │  ┃   ┃ ☼ FOO BAR ☼ ┃                                       ┃      │  4 ll. │
-  21 │  ┃ ┏━┻━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┃      │  4 ll. │
-  25 ├─ ┃ ┃ SECTION X: Blah blah blah                           ┃ ┃    ──┤  6 ll. ├─
-  31 ├─ ┃ ┃ SECTION Y: Blasé blasé blasé                        ┃ ┃    ──┤  6 ll. ├─
-  37 ├─ ┃ ┃ SECTION Z: Patati Patata                            ┃ ┃    ──┤  6 ll. ├─
-  43 │  ┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃      │  4 ll. │
-  47 │  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛      │  4 ll. │
-
-.. 2021-08-12: Here's what the folding used to look like, before overriding
-..             Vim's default folding markup:
-.. 
-..    1 +-- ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ---- |  4 lines |--
-..    5 +-- ┣━━ // * TABLE_OF_CONTENTS * // ━━━━━━━━━━━━━━━━━━━━━━━━━━┨ ---- |  4 lines |--
-..    9 +-- ┃   ┏━━━━━━━━━━━━━┓                                       ┃ ---- |  4 lines |--
-..   13 +-- ┃   ┃ ☼ FOO BAR ☼ ┃                                       ┃ ---- |  4 lines |--
-..   17 +-- ┃ ┏━┻━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┃ ---- |  4 lines |--
-..   21 +-- ┃ ┃ SECTION X: Blah blah blah                           ┃ ┃ ---- |  6 lines |--
-..   27 +-- ┃ ┃ SECTION Y: Blasé blasé blasé                        ┃ ┃ ---- |  6 lines |--
-..   33 +-- ┃ ┃ SECTION Z: Patati Patata                            ┃ ┃ ---- |  6 lines |--
-..   39 +-- ┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ---- |  4 lines |--
-..   43 +-- ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ---- |  4 lines |--
-
-Tips: Change ``redrawtime`` for Very Large Documents
-====================================================
-
-Vim's default ``redrawtime`` (``:echo &rdt``) is "2000", or 2 seconds.
-
-If Vim runs longer than this during syntax matching, it cancels the operation
-and logs the message, "'redrawtime' exceeded, syntax highlighting disabled".
-
-You can set this value larger to tell Vim to run the parser longer,
-e.g., ``:set redrawtime=10000``, or, better yet, you can add a modeline
-(such as one read by https://github.com/landonb/dubs_style_guard)
-to any reST document that needs extra parsing time. E.g., at the top
-of a reST document, you could add::
-
-  .. vim:rdt=10000
+  -------
 
 Tips: Related supercharged reST plugins
 =======================================
 
 Consider these complementary reST highlights plugins that pair
 well with this plugin to help you take notes in Vim:
+
+- Advanced reST document section folder.
+
+  `https://github.com/landonb/vim-reSTfold#🙏
+  <https://github.com/landonb/vim-reSTfold#🙏>`__
+
+  Supercharge your notetaking and recordkeeping!
+
+  Add section folding to your reST notes so you can,
+  e.g., collapse a 10,000-line-long TODO file and get a
+  nice high-level view of all the things you wanna do.
 
 - Additional syntax highlight rules.
 
@@ -338,17 +127,6 @@ well with this plugin to help you take notes in Vim:
   width, and not necessarily that it's five long — but *FIXME* is
   the ultimate developer action word, so might as well be five.)
 
-- Simple horizontal rule highlight.
-
-  `https://github.com/landonb/vim-reST-highline#➖
-  <https://github.com/landonb/vim-reST-highline#➖>`__
-
-  Repeat the same punctuation character 8 or more times on
-  a line, and it'll be highlighted.
-
-  Useful for adding a visual separation to your notes without
-  using a reST section heading.
-
 Installation
 ============
 
@@ -374,13 +152,13 @@ Clone the project to the desired path:
 
 .. code-block:: bash
 
-    git clone https://github.com/landonb/vim-reSTfold.git
+    git clone https://github.com/landonb/vim-reST-highline.git
 
 If you installed to the optional path, tell Vim to load the package:
 
 .. code-block:: vim
 
-   :packadd! vim-reSTfold
+   :packadd! vim-reST-highline
 
 Just once, tell Vim to build the online help:
 
@@ -392,5 +170,13 @@ Then whenever you want to reference the help from Vim, run:
 
 .. code-block:: vim
 
-   :help vim-reSTfold
+   :help vim-reST-highline
+
+License
+=======
+
+Copyright (c) Landon Bouma. This work is distributed
+wholly under CC0 and dedicated to the Public Domain.
+
+https://creativecommons.org/publicdomain/zero/1.0/
 

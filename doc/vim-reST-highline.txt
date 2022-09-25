@@ -1,207 +1,83 @@
-*vim-reSTfold.txt*	For Vim version 7.4.	Last change: 2018 Dec 07
+*vim-reST-highline.txt*	For Vim version 7.4.	Last change: 2022 Sep 24
 
-reST Document Folding~
+reST Horizontal Rule Highlighter~
 
-RESTRUCTUREDTEXT DOC FOLDER		*vim-reSTfold*
+RESTRUCTUREDTEXT HR HIGHLIGHTER			*vim-reST-highline*
 
-1. About This Plugin			|vim-rstfd-about|
-2. reST Section Syntax			|vim-rstfd-sectioning|
-3. Calculate reST Folds			|vim-rstfd-calculating|
-4. Transpose reST Folds			|vim-rstfd-transposing|
-5. Tips 'n Tricks			|vim-rstfd-tipsntricks|
+1. About This Plugin				|vim-rsthl-about|
+2. Why You Might Want to Use This Plugin	|vim-rsthl-butwhy|
 
 ==============================================================================
-1. About This Plugin			*vim-rstfd-about*
+1. About This Plugin			        *vim-rsthl-about*
 
-This plugin improves upon and fixes performance issues with Vim's
-built-in reST syntax highlighting and document section folding.
+This plugin highlights lines of repeated characters (that aren't
+otherwise a reST section header), so that you can add colorful
+delimiters to your reST documents.
 
-Project page: https://github.com/landonb/vim-reSTfold#🙏
-
-==============================================================================
-2. reST Section Syntax			*vim-rstfd-sectioning*
-
-reST Fold Delimiters
---------------------
-
-The reST language is flexible when it comes to delimiting sections,
-allowing you to choose generally any ASCII non-alphanum as a delimiter,
-and then inferring the level of each section by the order in which the
-section delimiters are introduced in the document. You can also choose
-to use just an underscored delimiter, or you can add an overscore, too.
-
-For instance, both of the following documents will render the same:
-
-Document 1:
-
-  `Level 1 Heading`
-  `###############`
-
-  `===============`
-  `Level 2 Heading`
-  `===============`
-
-and Document 2:
-
-  `===============`
-  `Level 1 Heading`
-  `===============`
-
-  `Level 2 Heading`
-  `---------------`
-
-Obviously, this flexibility makes any parser more complex to write,
-and it might noticeably impact real-time application responsiveness.
-
-Accordingly, the `vim-reSTfold` plugin imposes strict rules for
-section headers used for folding:
-
-- Only double-bordered reST sections will be folded.
-
-  E.g., this header with both an overscore and an underscore will be folded:
-
-    `###########################`
-    `This Section Will Be Folded`
-    `###########################`
-
-  but this header, with simply an underscore, will be ignored by the folding engine:
-
-    `This Section Will Not Be Folded`
-    `###############################`
-  
-- Fold levels are assigned in a specific, static order.
-
-  That is, as you use the command `zr` to collapse one level of folds,
-  or use `zm` to open a level of folds, or `za` to toggle the current
-  fold, the sections levels are determined based on the delimiter used:
-
-  - Level 1: `@`
-
-  - Level 2: `#`
-
-  - Level 3: `=`
-
-  - Level 4: `-`
-
-  For instance, this document has two Level 2 sections:
-
-    `@@@@@@@@@@@@@@@@@@@@@@@`
-    `Document Section Header`
-    `@@@@@@@@@@@@@@@@@@@@@@@`
-
-    `#####################`
-    `One Top-Level Section`
-    `#####################`
-
-    `===============`
-    `Level 3 Section`
-    `===============`
-
-    `#########################`
-    `Another Top-Level Section`
-    `#########################`
-
-    `=======================`
-    `Another Level 3 Section`
-    `=======================`
-
-    `A Level 3 reST section, but ignored by folder`
-    `=============================================`
-
-    `------------------------`
-    `Foldable Level 4 Section`
-    `------------------------`
+Project page: https://github.com/landonb/vim-reST-highline#➖
 
 ==============================================================================
-3. Calculate reST Folds			*vim-rstfd-calculating*
+2. Why You Might Want to Use This Plugin	*vim-rsthl-butwhy*
 
-Manually Calculating reST Folds [`<F5>`]
-----------------------------------------
+This plugin works quite simply: if you repeat the same character
+eight or more times on a line, and there are no other characters
+besides whitespace, that line is specially highlighted.
 
-By default, Vim enables reST folding.
+The author used to use this feature, e.g., to draw a line of
+pipes, and they'd be highlighted in green: >
 
-But this can cause performance issues, e.g., every time you insert or
-remove a character from a buffer, Vim has to recalculate folds.
+  Blah blah blah some text.
 
-To prevent performance issues, the user must explicitly generate folds.
+  |||||||||||||||||
 
-Press `<F5>` to generate (and collapse all) folds.
+  Blah blah blah some more text.
+<
+Or to draw a line of dollar signs, and they'd be highlighted
+with a cyan background, e.g.,: >
 
-==============================================================================
-4. Transpose reST Folds			*vim-rstfd-transposing*
+  Blah blah blah some text.
 
-Swap reST Sections (Transpose Folds) [`<C-Up>` and `<C-Down>`]
---------------------------------------------------------------
+  $$$$$$$$$$$$$$$$$
 
-In normal mode, with the cursor over a folded reST section,
-press `<C-Up>` to swap the fold under the cursor with the
-fold under the line above the cursor; press `<C-Down>` to
-swap with the fold on the line following the current fold.
+  Blah blah blah some more text.
+<
+But recently, the author has just been using a row of seven dashes
+as a delimiter, which the built-in `runtime/syntax/rst.vim` rules
+highlight in purple.
 
-==============================================================================
-5. Tips 'n Tricks			*vim-rstfd-tipsntricks*
+- You can easily insert such a line of dashes using the <Ctrl-->
+  (Ctrl-minus) shortcut, if you install `vim-ovm-seven-of-spines`
+  <https://github.com/landonb/vim-ovm-seven-of-spines>.
 
-Fold Title Trickery
--------------------
+Nonetheless, this plugin still exists, because it's how I used to
+roll, until I realized that a short horizontal rule of seven dashes
+was enough to delineate one sub-section of my notes from another,
+without creating a new section header.
 
-The reST section title that's sandwiched between the section delimiter
-lines is used for the folded view title.
+E.g., I might have a section for some bug that I want to fix, and
+then I'll use the seven-dash approach to separate my different
+thoughts on the subject, such as: >
 
-Because of this, you can design section titles that look good folded, too.
+  #########################################################
+  FIXME/2022-09-24: Move reST HR highlights to a new plugin
+  #########################################################
 
-For instance, consider the following, unfolded document:
+  FIXME/2022-09-24 22:11: Split the vim-reSTfold plugin to
+  spin-off the HR highlights.
 
-  `###########################################################`
-  `┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓`
-  `###########################################################`
+  -------
 
-  `###########################################################`
-  `┣━━ // * TABLE_OF_CONTENTS * // ━━━━━━━━━━━━━━━━━━━━━━━━━━┨`
-  `###########################################################`
+  SPIKE/2022-09-24 22:12: Verify that syntax load order does
+  not interfere with the `rstSections` rule from vim-reSTfold.
 
-  `###########################################################`
-  `┃   ┏━━━━━━━━━━━━━┓                                       ┃`
-  `###########################################################`
+  -------
 
-  `###########################################################`
-  `┃   ┃ ☼ FOO BAR ☼ ┃                            🏄 🏄 🏄   ┃`
-  `###########################################################`
+  ################################################
+  FIXME/2022-09-24: Some other issue I want to fix
+  ################################################
 
-  `###########################################################`
-  `┃ ┏━┻━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┃`
-  `###########################################################`
+  Blah blah blah.
 
-  `###########################################################`
-  `┃ ┃ SECTION X: Blah blah blah                           ┃ ┃`
-  `###########################################################`
-
-  `###########################################################`
-  `┃ ┃ SECTION Y: Blasé blasé blasé                        ┃ ┃`
-  `###########################################################`
-
-  `###########################################################`
-  `┃ ┃ SECTION Z: Patati Patata                            ┃ ┃`
-  `###########################################################`
-
-  `###########################################################`
-  `┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃`
-  `###########################################################`
-
-  `###########################################################`
-  `┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛`
-  `###########################################################`
-
-Once folded (e.g., using `<F5>`), it'll look like this:
-
-  `1  +-- ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ---- |  4 lines |--`
-  `5  +-- ┣━━ // * TABLE_OF_CONTENTS * // ━━━━━━━━━━━━━━━━━━━━━━━━━━┨ ---- |  4 lines |--`
-  `9  +-- ┃   ┏━━━━━━━━━━━━━┓                                       ┃ ---- |  4 lines |--`
-  `13 +-- ┃   ┃ ☼ FOO BAR ☼ ┃                            🏄 🏄 🏄   ┃ ---- |  4 lines |--`
-  `17 +-- ┃ ┏━┻━━━━━━━━━━━━━┻━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ ┃ ---- |  4 lines |--`
-  `21 +-- ┃ ┃ SECTION X: Blah blah blah                           ┃ ┃ ---- |  4 lines |--`
-  `25 +-- ┃ ┃ SECTION Y: Blasé blasé blasé                        ┃ ┃ ---- |  4 lines |--`
-  `29 +-- ┃ ┃ SECTION Z: Patati Patata                            ┃ ┃ ---- |  4 lines |--`
-  `33 +-- ┃ ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ┃ ---- |  4 lines |--`
-  `37 +-- ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛ ---- |  4 lines |--`
-
+  -------
+<
  vim:tw=78:ts=8:ft=help:norl:
