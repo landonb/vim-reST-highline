@@ -47,7 +47,7 @@ highlight in purple.
 
 - You can easily insert such a line of dashes using the <Ctrl-->
   (Ctrl-minus) shortcut, if you install `vim-ovm-seven-of-spines`
-  <https://github.com/landonb/vim-ovm-seven-of-spines>.
+  <https://github.com/landonb/vim-ovm-seven-of-spines#🦴>.
 
 Nonetheless, this plugin still exists, because it's how I used to
 roll, until I realized that a short horizontal rule of seven dashes

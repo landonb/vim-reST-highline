@@ -51,8 +51,8 @@ as a delimiter, which the built-in ``runtime/syntax/rst.vim`` rules
 highlight in purple.
 
 - You can easily insert such a line of dashes using the ``<Ctrl-->``
-  (Ctrl-minus) shortcut, if you install `vim-ovm-seven-of-spines
-  <https://github.com/landonb/vim-ovm-seven-of-spines>`__.
+  (Ctrl-minus) shortcut, if you install `vim-ovm-seven-of-spines#🦴
+  <https://github.com/landonb/vim-ovm-seven-of-spines#🦴>`__.
 
 Nonetheless, this plugin still exists, because it's how I used to
 roll, until I realized that a short horizontal rule of seven dashes
