@@ -169,13 +169,13 @@ function! s:reST_highline_Apply_Highlights()
   " Match lines of repeating `%`s.
   syn match rstFakeHRPercs '^\s*%\{8,}\s*\n$'
 
-  " Orange-yellow: Statement, or Keyword
+  " Orange-yellow for Statement, or Keyword
   hi! def link rstFakeHRAll   Statement
   " More orangy (darker than orange-yellow)
   hi! def link rstFakeHRStars Delimiter
   " Light pinkish-orangish-reddish
   hi! def link rstFakeHRPercs String
-  " Green: Type, or Question
+  " Green for Type, or Question
   hi! def link rstFakeHRPipes Question
   " White on baby blue
   hi! def link rstFakeHRParns MatchParen
