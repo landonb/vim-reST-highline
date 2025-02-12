@@ -1,6 +1,6 @@
 *vim-reST-highline.txt*	For Vim version 7.4.	Last change: 2022 Sep 24
 
-reST Horizontal Rule Highlighter~
+reST Horizontal Rule Highlighter ➖ ~
 
 RESTRUCTUREDTEXT HR HIGHLIGHTER			*vim-reST-highline*
 
